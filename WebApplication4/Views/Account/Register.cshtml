@@ -20,48 +20,61 @@
                     </div>
                 }
 
-                <form asp-action="Register" method="post" enctype="multipart/form-data">
+                <form asp-action="Register" method="post" enctype="multipart/form-data" id="registerForm" novalidate>
                     @if (!ViewData.ModelState.IsValid)
                     {
-                        <div class="alert alert-danger mb-4">
-                            <strong class="d-block mb-2"><i class="bi bi-x-circle-fill me-2"></i>Please fix the following:</strong>
-                            <ul class="mb-0 small">
-                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                                {
-                                    <li>@error.ErrorMessage</li>
-                                }
-                            </ul>
+                        <div class="alert alert-danger mb-4 d-flex align-items-start" role="alert">
+                            <i class="bi bi-x-circle-fill me-2 fs-5 mt-1"></i>
+                            <div>
+                                <strong class="d-block mb-1">Please fix the following:</strong>
+                                <ul class="mb-0 small ps-3">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                            </div>
                         </div>
                     }
 
+                    {{!-- Full Name --}}
                     <div class="mb-4">
                         <label asp-for="Name" class="form-label fw-bold">Full Name</label>
-                        <div class="input-group">
+                        <div class="input-group has-validation">
                             <span class="input-group-text bg-light border-0"><i class="bi bi-person"></i></span>
-                            <input asp-for="Name" class="form-control bg-light border-0 py-3" placeholder="John Doe" />
+                            <input asp-for="Name" class="form-control bg-light border-0 py-3"
+                                   placeholder="John Doe" id="Name" />
+                            <div class="invalid-feedback" id="nameError"></div>
                         </div>
                         <span asp-validation-for="Name" class="text-danger small"></span>
                     </div>
 
+                    {{!-- Email --}}
                     <div class="mb-4">
                         <label asp-for="Email" class="form-label fw-bold">Email Address</label>
-                        <div class="input-group">
+                        <div class="input-group has-validation">
                             <span class="input-group-text bg-light border-0"><i class="bi bi-envelope"></i></span>
-                            <input asp-for="Email" type="email" class="form-control bg-light border-0 py-3" placeholder="example@gmail.com" />
+                            <input asp-for="Email" type="email" class="form-control bg-light border-0 py-3"
+                                   placeholder="example@gmail.com" id="Email" />
+                            <div class="invalid-feedback" id="emailError"></div>
                         </div>
                         <span asp-validation-for="Email" class="text-danger small"></span>
                         <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Only Gmail addresses are supported</small>
                     </div>
 
+                    {{!-- Phone --}}
                     <div class="mb-4">
                         <label asp-for="Phone" class="form-label fw-bold">Phone Number</label>
-                        <div class="input-group">
+                        <div class="input-group has-validation">
                             <span class="input-group-text bg-light border-0"><i class="bi bi-telephone"></i></span>
-                            <input asp-for="Phone" type="tel" class="form-control bg-light border-0 py-3" placeholder="+1 234 567 890" />
+                            <input asp-for="Phone" type="tel" class="form-control bg-light border-0 py-3"
+                                   placeholder="+1 234 567 890" id="Phone" />
+                            <div class="invalid-feedback" id="phoneError"></div>
                         </div>
                         <span asp-validation-for="Phone" class="text-danger small"></span>
                     </div>
 
+                    {{!-- Role --}}
                     <div class="mb-4">
                         <label class="form-label fw-bold d-block">I want to join as:</label>
                         <div class="d-flex gap-4 p-3 bg-light rounded-3">
@@ -81,36 +94,53 @@
                         <span asp-validation-for="UserRole" class="text-danger small"></span>
                     </div>
 
+                    {{!-- Password --}}
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             <label asp-for="Password" class="form-label fw-bold">Password</label>
-                            <div class="input-group">
+                            <div class="input-group has-validation">
                                 <span class="input-group-text bg-light border-0"><i class="bi bi-lock"></i></span>
-                                <input asp-for="Password" type="password" class="form-control bg-light border-0 py-3" />
+                                <input asp-for="Password" type="password" class="form-control bg-light border-0 py-3"
+                                       id="Password" placeholder="Min. 6 characters" />
+                                <button class="btn btn-outline-secondary border-0 bg-light" type="button"
+                                        id="togglePassword" tabindex="-1">
+                                    <i class="bi bi-eye" id="eyeIconPass"></i>
+                                </button>
+                                <div class="invalid-feedback" id="passwordError"></div>
                             </div>
                             <span asp-validation-for="Password" class="text-danger small"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="ConfirmedPassword" class="form-label fw-bold">Confirm Password</label>
-                            <div class="input-group">
+                            <div class="input-group has-validation">
                                 <span class="input-group-text bg-light border-0"><i class="bi bi-shield-check"></i></span>
-                                <input asp-for="ConfirmedPassword" type="password" class="form-control bg-light border-0 py-3" />
+                                <input asp-for="ConfirmedPassword" type="password" class="form-control bg-light border-0 py-3"
+                                       id="ConfirmedPassword" placeholder="Repeat password" />
+                                <button class="btn btn-outline-secondary border-0 bg-light" type="button"
+                                        id="toggleConfirm" tabindex="-1">
+                                    <i class="bi bi-eye" id="eyeIconConfirm"></i>
+                                </button>
+                                <div class="invalid-feedback" id="confirmError"></div>
                             </div>
                             <span asp-validation-for="ConfirmedPassword" class="text-danger small"></span>
                         </div>
                     </div>
 
+                    {{!-- Profile Image --}}
                     <div class="mb-5">
-                        <label for="imageFile" class="form-label fw-bold">Profile Image (Optional)</label>
-                        <div class="input-group">
+                        <label for="imageFile" class="form-label fw-bold">Profile Image <span class="text-muted fw-normal">(Optional)</span></label>
+                        <div class="input-group has-validation">
                             <span class="input-group-text bg-light border-0"><i class="bi bi-image"></i></span>
-                            <input type="file" name="imageFile" id="imageFile" class="form-control bg-light border-0 py-3" accept="image/*" />
+                            <input type="file" name="imageFile" id="imageFile"
+                                   class="form-control bg-light border-0 py-3"
+                                   accept="image/jpeg,image/png,image/gif,image/webp" />
+                            <div class="invalid-feedback" id="imageError"></div>
                         </div>
                         <small class="text-muted">Max size: 5MB (JPG, PNG, GIF, WEBP)</small>
                     </div>
 
                     <div class="d-grid shadow-sm">
-                        <button type="submit" class="btn btn-primary btn-lg py-3 rounded-pill fw-bold">
+                        <button type="submit" class="btn btn-primary btn-lg py-3 rounded-pill fw-bold" id="registerBtn">
                             Create Account
                         </button>
                     </div>
@@ -127,40 +157,149 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
-        // Client-side validation enhancement
-        $(document).ready(function() {
-            // Real-time password match validation
-            $('#ConfirmedPassword').on('keyup', function() {
-                var password = $('#Password').val();
-                var confirmPassword = $(this).val();
-                
-                if (confirmPassword !== '' && password !== confirmPassword) {
-                    $(this).get(0).setCustomValidity('Passwords do not match');
-                } else {
-                    $(this).get(0).setCustomValidity('');
+        (function () {
+            'use strict';
+
+            const form = document.getElementById('registerForm');
+
+            // ── Toggle password visibility ──────────────────────────────
+            function setupToggle(btnId, inputId, iconId) {
+                document.getElementById(btnId).addEventListener('click', function () {
+                    const input = document.getElementById(inputId);
+                    const icon  = document.getElementById(iconId);
+                    const isPwd = input.type === 'password';
+                    input.type  = isPwd ? 'text' : 'password';
+                    icon.classList.toggle('bi-eye',        !isPwd);
+                    icon.classList.toggle('bi-eye-slash',   isPwd);
+                });
+            }
+            setupToggle('togglePassword', 'Password',          'eyeIconPass');
+            setupToggle('toggleConfirm',  'ConfirmedPassword', 'eyeIconConfirm');
+
+            // ── Helper functions ────────────────────────────────────────
+            function setInvalid(inputId, errorId, message) {
+                const el  = document.getElementById(inputId);
+                const err = document.getElementById(errorId);
+                el.classList.remove('is-valid');
+                el.classList.add('is-invalid');
+                if (err) err.textContent = message;
+            }
+
+            function setValid(inputId) {
+                const el = document.getElementById(inputId);
+                el.classList.remove('is-invalid');
+                el.classList.add('is-valid');
+            }
+
+            // ── Individual validators ───────────────────────────────────
+            function validateName() {
+                const val = document.getElementById('Name').value.trim();
+                if (val === '') {
+                    setInvalid('Name', 'nameError', 'Full name is required.'); return false;
+                } else if (val.length < 2) {
+                    setInvalid('Name', 'nameError', 'Name must be at least 2 characters.'); return false;
+                } else if (val.length > 100) {
+                    setInvalid('Name', 'nameError', 'Name cannot exceed 100 characters.'); return false;
                 }
+                setValid('Name'); return true;
+            }
+
+            function validateEmail() {
+                const val   = document.getElementById('Email').value.trim().toLowerCase();
+                const regex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                if (val === '') {
+                    setInvalid('Email', 'emailError', 'Email address is required.'); return false;
+                } else if (!regex.test(val)) {
+                    setInvalid('Email', 'emailError', 'Please enter a valid email address.'); return false;
+                } else if (!val.endsWith('@@gmail.com')) {
+                    setInvalid('Email', 'emailError', 'Only Gmail addresses are supported (@gmail.com).'); return false;
+                }
+                setValid('Email'); return true;
+            }
+
+            function validatePhone() {
+                const val   = document.getElementById('Phone').value.trim();
+                const regex = /^\+?[0-9\s\-\(\)]{7,20}$/;
+                if (val === '') {
+                    setInvalid('Phone', 'phoneError', 'Phone number is required.'); return false;
+                } else if (!regex.test(val)) {
+                    setInvalid('Phone', 'phoneError', 'Enter a valid phone number (e.g. +1 234 567 890).'); return false;
+                }
+                setValid('Phone'); return true;
+            }
+
+            function validatePassword() {
+                const val = document.getElementById('Password').value;
+                if (val === '') {
+                    setInvalid('Password', 'passwordError', 'Password is required.'); return false;
+                } else if (val.length < 6) {
+                    setInvalid('Password', 'passwordError', 'Password must be at least 6 characters.'); return false;
+                } else if (val.length > 255) {
+                    setInvalid('Password', 'passwordError', 'Password is too long.'); return false;
+                }
+                setValid('Password'); return true;
+            }
+
+            function validateConfirm() {
+                const pass    = document.getElementById('Password').value;
+                const confirm = document.getElementById('ConfirmedPassword').value;
+                if (confirm === '') {
+                    setInvalid('ConfirmedPassword', 'confirmError', 'Please confirm your password.'); return false;
+                } else if (pass !== confirm) {
+                    setInvalid('ConfirmedPassword', 'confirmError', 'Passwords do not match.'); return false;
+                }
+                setValid('ConfirmedPassword'); return true;
+            }
+
+            function validateImage() {
+                const fileInput = document.getElementById('imageFile');
+                if (fileInput.files.length === 0) return true; // Optional field
+
+                const file    = fileInput.files[0];
+                const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                const maxSize = 5 * 1024 * 1024; // 5 MB
+
+                if (!allowed.includes(file.type)) {
+                    setInvalid('imageFile', 'imageError', 'Only JPG, PNG, GIF, WEBP images are allowed.'); return false;
+                } else if (file.size > maxSize) {
+                    setInvalid('imageFile', 'imageError', 'Image size must not exceed 5 MB.'); return false;
+                }
+                setValid('imageFile'); return true;
+            }
+
+            // ── Blur listeners ──────────────────────────────────────────
+            document.getElementById('Name').addEventListener('blur',              validateName);
+            document.getElementById('Email').addEventListener('blur',             validateEmail);
+            document.getElementById('Phone').addEventListener('blur',             validatePhone);
+            document.getElementById('Password').addEventListener('blur',          validatePassword);
+            document.getElementById('ConfirmedPassword').addEventListener('blur', validateConfirm);
+            document.getElementById('imageFile').addEventListener('change',       validateImage);
+
+            // Re-validate confirm when password changes
+            document.getElementById('Password').addEventListener('input', function () {
+                if (document.getElementById('ConfirmedPassword').value !== '') validateConfirm();
+                if (this.classList.contains('is-invalid') || this.classList.contains('is-valid')) validatePassword();
             });
 
-            // Email Gmail validation
-            $('#Email').on('blur', function() {
-                var email = $(this).val().toLowerCase();
-                var gmailDomain = '@@gmail.com';
-                if (email !== '' && !email.endsWith(gmailDomain)) {
-                    $(this).get(0).setCustomValidity('Email must be a Gmail address (@@gmail.com)');
-                } else {
-                    $(this).get(0).setCustomValidity('');
-                }
-            });
+            // ── Form submit ─────────────────────────────────────────────
+            form.addEventListener('submit', function (e) {
+                const results = [
+                    validateName(),
+                    validateEmail(),
+                    validatePhone(),
+                    validatePassword(),
+                    validateConfirm(),
+                    validateImage()
+                ];
 
-            // Password length validation
-            $('#Password').on('keyup', function() {
-                var password = $(this).val();
-                if (password !== '' && password.length < 6) {
-                    $(this).get(0).setCustomValidity('Password must be at least 6 characters long');
-                } else {
-                    $(this).get(0).setCustomValidity('');
+                if (results.includes(false)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Scroll to first invalid field
+                    const firstInvalid = form.querySelector('.is-invalid');
+                    if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             });
-        });
+        })();
     </script>
 }

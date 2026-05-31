@@ -26,6 +26,7 @@ namespace WebApplication4.Models
 
         [Required(ErrorMessage = "Phone number is required")]
         [StringLength(20, ErrorMessage = "Phone cannot exceed 20 characters")]
+        [RegularExpression(@"^\+?[0-9\s\-\(\)]{7,20}$", ErrorMessage = "Please enter a valid phone number (e.g. +1 234 567 890)")]
         public string Phone { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Password is required")]
