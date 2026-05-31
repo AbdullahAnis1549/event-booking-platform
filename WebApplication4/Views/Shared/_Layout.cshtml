@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WebApplication4</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebApplication4.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-3">
+            <div class="container-fluid px-4 px-md-5">
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-crown-fill me-2 fs-3"></i>
+                    <span class="fs-4">Elite Events</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        @{
+                            var userRole = Context.Session.GetString("UserRole");
+                        }
+
+                        @if (userRole == "admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link fw-bold text-warning" asp-controller="Admin" asp-action="Dashboard">Admin Dashboard</a>
+                            </li>
+                        }
+                        else if (userRole == "organizer")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link fw-bold premium-gold-text" asp-controller="Organizer" asp-action="Dashboard">My Events Dashboard</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">Discover</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Event" asp-action="Index">Events</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="About" asp-action="Index">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Contact" asp-action="Index">Contact</a>
+                            </li>
+                            @if (Context.Session.GetString("UserId") != null)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Booking" asp-action="MyBookings">My Tickets</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    <ul class="navbar-nav align-items-center">
+                        @if (Context.Session.GetString("UserId") != null)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="position-relative me-2">
+                                        @if (!string.IsNullOrEmpty(Context.Session.GetString("UserImageUrl")))
+                                        {
+                                            <img src="@Context.Session.GetString("UserImageUrl")" alt="Profile" class="rounded-circle border border-2 border-white" style="width: 35px; height: 35px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center border border-2 border-white" style="width: 35px; height: 35px;">
+                                                <i class="bi bi-person text-white"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <span class="d-none d-md-inline">@Context.Session.GetString("UserName")</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" aria-labelledby="navbarDropdown">
+                                    <li><div class="dropdown-header">Account Management</div></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="bi bi-person-gear me-2"></i>Profile Settings</a></li>
+                                    @if (userRole != "admin" && userRole != "organizer")
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Booking" asp-action="MyBookings"><i class="bi bi-ticket-perforated me-2"></i>Purchased Tickets</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="px-3 py-2">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger btn-sm w-100 rounded-pill">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item me-2">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-primary rounded-pill px-4" asp-controller="Account" asp-action="Register">Join Now</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="border-top footer text-muted">
+        <div class="container-fluid px-4 px-md-5">
+            &copy; 2026 - WebApplication4 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .build();
+
+        connection.on("ReceiveAdminNotification", function (message) {
+            // Show notification only to admins
+            if ('@Context.Session.GetString("UserRole")' === 'admin' || '@Context.Session.GetString("UserRole")' === 'organizer') {
+                showToast("Notification", message, "info");
+            }
+        });
+
+        connection.on("ReceiveSeatUpdate", function (eventId, availableSeats) {
+            // Update seat count on details page or home page if present
+            const seatElement = document.querySelector(`[data-event-id="${eventId}"] .seat-count`);
+            if (seatElement) {
+                seatElement.innerText = availableSeats + " seats remaining";
+                if (availableSeats <= 5) {
+                    seatElement.classList.add('text-danger', 'fw-bold');
+                }
+            }
+        });
+
+        connection.start().catch(err => console.error(err.toString()));
+
+        function showToast(title, message, type) {
+            // Simple toast implementation or use a library
+            console.log("Toast:", title, message);
+            alert(title + ": " + message); // Placeholder for a nicer toast
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

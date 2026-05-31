@@ -1,0 +1,136 @@
+@model WebApplication4.Models.Event
+
+@{
+    ViewData["Title"] = "Edit Event";
+}
+
+<div class="row justify-content-center py-5" style="background: linear-gradient(135deg, #0f0f0f 0%, #222 100%); min-height: 90vh;">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeInUp">
+            <div class="card-header bg-dark text-white py-4 text-center border-bottom border-warning">
+                <i class="bi bi-pencil-square fs-1 mb-2 premium-gold-text"></i>
+                <h3 class="fw-bold mb-0 premium-gradient-text">Update Event Details</h3>
+                <p class="mb-0 opacity-75">Modify your event information below</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Title" class="form-label fw-bold">Event Title</label>
+                        <input asp-for="Title" class="form-control form-control-lg border-2" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-bold">Description</label>
+                        <textarea asp-for="Description" class="form-control border-2" rows="5"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Category" class="form-label fw-bold">Category</label>
+                            <select asp-for="Category" id="categorySelect" class="form-select form-select-lg border-2">
+                                <option value="Weddings">Weddings</option>
+                                <option value="Birthdays">Birthdays</option>
+                                <option value="Corporate">Corporate Events</option>
+                            </select>
+                            <span asp-validation-for="Category" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="SubCategory" class="form-label fw-bold">Sub-Category</label>
+                            <select asp-for="SubCategory" id="subCategorySelect" class="form-select form-select-lg border-2" data-selected="@Model.SubCategory">
+                                <!-- Options will be populated by JS -->
+                            </select>
+                            <span asp-validation-for="SubCategory" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="EventDate" class="form-label fw-bold">Date & Time</label>
+                            <input asp-for="EventDate" class="form-control border-2" />
+                            <span asp-validation-for="EventDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Location" class="form-label fw-bold">Location</label>
+                            <input asp-for="Location" class="form-control border-2" />
+                            <span asp-validation-for="Location" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Price" class="form-label fw-bold">Price ($)</label>
+                            <input asp-for="Price" class="form-control border-2" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="TotalSeats" class="form-label fw-bold">Total Seats</label>
+                            <input asp-for="TotalSeats" class="form-control border-2" />
+                            <span asp-validation-for="TotalSeats" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-bold d-block">Current Banner</label>
+                            <img src="@Model.ImageUrl" class="rounded-3 shadow-sm" style="height: 120px; width: 100%; object-fit: cover;" />
+                        </div>
+                    }
+
+                    <div class="mb-5">
+                        <label class="form-label fw-bold">Change Banner Image (Optional)</label>
+                        <input type="file" name="imageFile" class="form-control border-2" accept="image/*" />
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg py-3 rounded-3 shadow fw-bold">
+                            Save Changes
+                        </button>
+                        <a asp-action="Dashboard" asp-controller="Organizer" class="btn btn-link text-muted">
+                            Cancel and Return
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        const subCategories = {
+            "Weddings": ["Mehndi", "Baraat", "Walima", "Engagement", "Nikah", "Shadi"],
+            "Birthdays": ["Kids Party", "Adult Celebration", "Milestone Birthday", "Surprise Party"],
+            "Corporate": ["Conference", "Seminar", "Product Launch", "Team Building", "Workshop", "Award Ceremony"]
+        };
+
+        const categorySelect = document.getElementById('categorySelect');
+        const subCategorySelect = document.getElementById('subCategorySelect');
+        const initialSubCategory = subCategorySelect.getAttribute('data-selected');
+
+        function updateSubCategories(selectedSub = null) {
+            const selectedCategory = categorySelect.value;
+            const options = subCategories[selectedCategory] || [];
+            
+            subCategorySelect.innerHTML = '';
+            options.forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub;
+                option.textContent = sub;
+                if (sub === selectedSub) {
+                    option.selected = true;
+                }
+                subCategorySelect.appendChild(option);
+            });
+        }
+
+        categorySelect.addEventListener('change', () => updateSubCategories());
+        
+        // Initial population
+        updateSubCategories(initialSubCategory);
+    </script>
+}

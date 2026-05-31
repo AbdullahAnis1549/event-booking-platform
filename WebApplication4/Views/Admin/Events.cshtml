@@ -1,0 +1,169 @@
+@model IEnumerable<WebApplication4.Models.Event>
+@{
+    ViewData["Title"] = "All Events";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="fw-bold text-dark border-start border-4 border-primary ps-3">All Events</h2>
+            <p class="text-muted">View and manage all events on the platform.</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 bg-primary text-white">
+                <div class="card-body text-center p-3">
+                    <h3 class="fw-bold mb-0">@Model.Count()</h3>
+                    <small>Total Events</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 bg-success text-white">
+                <div class="card-body text-center p-3">
+                    <h3 class="fw-bold mb-0">@Model.Count(e => e.IsApproved)</h3>
+                    <small>Approved</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 bg-warning text-white">
+                <div class="card-body text-center p-3">
+                    <h3 class="fw-bold mb-0">@Model.Count(e => !e.IsApproved)</h3>
+                    <small>Pending</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 bg-info text-white">
+                <div class="card-body text-center p-3">
+                    <h3 class="fw-bold mb-0">@Model.Count(e => e.EventDate >= DateTime.Today)</h3>
+                    <small>Upcoming</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">All Events</h5>
+                <div class="input-group" style="max-width: 300px;">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchEvents" class="form-control bg-light border-0" placeholder="Search events...">
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="eventsTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Event</th>
+                            <th>Organizer</th>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Seats</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var evt in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(evt.ImageUrl))
+                                        {
+                                            <img src="@evt.ImageUrl" class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-secondary rounded me-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <i class="bi bi-calendar-event text-white"></i>
+                                            </div>
+                                        }
+                                        <div>
+                                            <div class="fw-bold">@evt.Title</div>
+                                            <small class="text-muted">@evt.Location</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>@evt.Organizer?.Name</div>
+                                    <small class="text-muted">@evt.Organizer?.Email</small>
+                                </td>
+                                <td>
+                                    <div class="small">@evt.EventDate.ToString("MMM dd, yyyy")</div>
+                                    <small class="text-muted">@evt.EventDate.ToString("hh:mm tt")</small>
+                                </td>
+                                <td><span class="badge bg-secondary">@evt.Category</span></td>
+                                <td class="fw-bold">@evt.Price.ToString("C")</td>
+                                <td>
+                                    <div>@evt.AvailableSeats / @evt.TotalSeats</div>
+                                    <small class="text-muted">available</small>
+                                </td>
+                                <td>
+                                    @if (evt.IsApproved)
+                                    {
+                                        <span class="badge bg-success">Approved</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Pending</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/Event/Details/@evt.Id" class="btn btn-outline-primary" target="_blank">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <form asp-action="DeleteEvent" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this event?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@evt.Id" />
+                                            <button type="submit" class="btn btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="ToggleSuccessfulEvent" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@evt.Id" />
+                                            <button type="submit" class="btn @(evt.IsSuccessful ? "btn-success" : "btn-outline-success")" title="@(evt.IsSuccessful ? "Marked as Successful" : "Mark as Successful")">
+                                                <i class="bi bi-trophy"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('searchEvents').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#eventsTable tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchValue) ? '' : 'none';
+        });
+    });
+</script>

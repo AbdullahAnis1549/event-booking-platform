@@ -1,0 +1,392 @@
+﻿@model WebApplication4.Models.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!-- Dynamic Hero Carousel -->
+<div id="heroCarousel" class="carousel slide carousel-fade position-relative" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        @for (int i = 0; i < Model.HeroImages.Count(); i++)
+        {
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+        }
+    </div>
+    <div class="carousel-inner">
+        @if (Model.HeroImages.Any())
+        {
+            int index = 0;
+            foreach (var hero in Model.HeroImages)
+            {
+                <div class="carousel-item @(index == 0 ? "active" : "")">
+                    <div class="hero-container position-relative overflow-hidden" style="height: 80vh; min-height: 600px;">
+                        <img src="@hero.ImageUrl" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover; filter: brightness(0.6) contrast(1.1);" alt="@hero.Title">
+                        <div class="container h-100 position-relative z-index-1">
+                            <div class="row h-100 align-items-center justify-content-center">
+                                <div class="col-md-8 text-center animate__animated animate__fadeInUp">
+                                    <h1 class="display-2 fw-bold mb-3 premium-gradient-text">@hero.Title</h1>
+                                    <p class="lead fw-normal mb-4 text-white opacity-90" style="font-size: 1.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">@hero.Subtitle</p>
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <a class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow-lg" href="#upcoming-events">Explore Events</a>
+                                        @if (Context.Session.GetString("UserRole") == "organizer")
+                                        {
+                                            <a class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-bold border-2" asp-controller="Event" asp-action="Create">Host Premium Event</a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                index++;
+            }
+        }
+        else
+        {
+             <!-- Fallback if no images -->
+             <div class="carousel-item active">
+                <div class="hero-container position-relative overflow-hidden" style="height: 80vh; min-height: 600px;">
+                    <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover; filter: brightness(0.5) contrast(1.1);" alt="Elite Event Experiences">
+                    <div class="container h-100 position-relative z-index-1">
+                        <div class="row h-100 align-items-center justify-content-center text-center">
+                            <div class="col-md-8 mx-auto">
+                                <h1 class="display-2 fw-bold mb-3 premium-gradient-text">Elite Event Experiences</h1>
+                                <p class="lead fw-normal mb-4 text-white opacity-90" style="font-size: 1.5rem;">The ultimate destination for your events.</p>
+                                <a class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow-lg" href="#upcoming-events">Explore Collection</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<!-- Features Stats -->
+<div class="container-fluid px-4 px-md-5 py-5 mt-n5 position-relative z-index-2">
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-3">
+            <div class="card stat-card border-0 shadow-lg text-center p-4 bg-white">
+                <i class="bi bi-calendar-check text-warning fs-1 mb-2"></i>
+                <h4 class="fw-bold">100+</h4>
+                <p class="text-muted mb-0">Events Hosted</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card border-0 shadow-lg text-center p-4 bg-white">
+                <i class="bi bi-people text-warning fs-1 mb-2"></i>
+                <h4 class="fw-bold">50k+</h4>
+                <p class="text-muted mb-0">Happy Users</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card border-0 shadow-lg text-center p-4 bg-white">
+                <i class="bi bi-geo-alt text-warning fs-1 mb-2"></i>
+                <h4 class="fw-bold">20+</h4>
+                <p class="text-muted mb-0">Cities Covered</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Events Header -->
+<div class="container-fluid px-4 px-md-5 py-5" id="upcoming-events">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-primary fw-bold text-uppercase tracking-wider">Discover</span>
+            <h2 class="display-5 fw-bold text-dark">Upcoming Events</h2>
+        </div>
+        <a asp-controller="Event" asp-action="Index" class="btn btn-link text-decoration-none fw-bold">View All Events <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5 bg-white">
+        <form id="searchForm" class="row g-3 align-items-end">
+            <!-- Same Filters as before, keeping inputs but updated IDs if needed. Using original IDs to reuse JS logic -->
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" id="searchInput" class="form-control bg-light border-0" placeholder="Event title..." value="@ViewBag.Search">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Category</label>
+                <select name="category" id="categorySelect" class="form-select bg-light border-0">
+                    <option value="All" selected="@(string.IsNullOrEmpty(ViewBag.Category) || ViewBag.Category == "All")">All Categories</option>
+                    <option value="Weddings" selected="@(ViewBag.Category == "Weddings")">Weddings</option>
+                    <option value="Birthdays" selected="@(ViewBag.Category == "Birthdays")">Birthdays</option>
+                    <option value="Corporate" selected="@(ViewBag.Category == "Corporate")">Corporate Events</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Date Filter</label>
+                <select name="dateFilter" id="dateFilterSelect" class="form-select bg-light border-0">
+                    <!-- Default to Upcoming as per user request flow, but option available -->
+                    <option value="Upcoming" selected="@(string.IsNullOrEmpty(ViewBag.DateFilter) || ViewBag.DateFilter == "Upcoming")">Upcoming</option>
+                    <option value="Today" selected="@(ViewBag.DateFilter == "Today")">Today</option>
+                    <option value="ThisWeekend" selected="@(ViewBag.DateFilter == "ThisWeekend")">This Weekend</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Max Price</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0">$</span>
+                    <input type="number" name="maxPrice" id="maxPriceInput" class="form-control bg-light border-0" placeholder="Price" value="@ViewBag.MaxPrice">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Location</label>
+                <input type="text" name="location" id="locationInput" class="form-control bg-light border-0" placeholder="City" value="@ViewBag.Location">
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 shadow-sm">
+                    <i class="bi bi-filter"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div id="eventsContainer">
+        <!-- Render Initial Upcoming Events -->
+        @if (!Model.UpcomingEvents.Any())
+        {
+            <div class="text-center py-5 border rounded-4 bg-light">
+                <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                <h3 class="mt-4">No upcoming events found</h3>
+                <p class="text-muted">Check back later for new amazing events!</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var item in Model.UpcomingEvents)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card event-card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                            <div class="position-relative">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" class="card-img-top" style="height: 240px; object-fit: cover;" alt="@item.Title">
+                                }
+                                else
+                                {
+                                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 240px;">
+                                        <i class="bi bi-image text-white-50 display-1"></i>
+                                    </div>
+                                }
+                                <div class="position-absolute top-0 end-0 m-3">
+                                    <span class="badge bg-white text-dark shadow-sm px-3 py-2 fw-bold">@item.Price.ToString("C")</span>
+                                </div>
+                                <div class="position-absolute bottom-0 start-0 m-3" data-event-id="@item.Id">
+                                    <span class="badge bg-primary px-3 py-2 fw-bold seat-count">@item.AvailableSeats Left</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-2 text-danger fw-bold">
+                                    <i class="bi bi-calendar-event me-2"></i> @item.EventDate.ToString("MMM dd, yyyy")
+                                </div>
+                                <h4 class="card-title fw-bold text-dark mb-3">@item.Title</h4>
+                                <p class="text-muted text-truncate">@item.Description</p>
+                                
+                                <div class="d-flex align-items-center pt-3 border-top">
+                                    <i class="bi bi-geo-alt-fill text-muted me-2"></i>
+                                    <span class="text-muted small">@item.Location</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 p-4 pt-0">
+                                <a asp-controller="Event" asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Successful Events Section -->
+@if (Model.SuccessfulEvents.Any())
+{
+    <div class="container-fluid px-4 px-md-5 py-5 bg-light rounded-4 my-5" id="successful-events">
+        <div class="d-flex justify-content-between align-items-end mb-4 px-3">
+             <div>
+                <span class="text-success fw-bold text-uppercase tracking-wider">Memories</span>
+                <h2 class="display-5 fw-bold text-dark">Successful Events</h2>
+            </div>
+        </div>
+
+        <div class="row g-4 px-3">
+            @foreach (var item in Model.SuccessfulEvents)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card event-card border-0 shadow-sm rounded-4 h-100 overflow-hidden grayscale-hover">
+                        <div class="position-relative">
+                             @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" class="card-img-top" style="height: 240px; object-fit: cover; filter: grayscale(30%);" alt="@item.Title">
+                            }
+                            else
+                            {
+                                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 240px;">
+                                    <i class="bi bi-image text-white-50 display-1"></i>
+                                </div>
+                            }
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-success text-white shadow-sm px-3 py-2 fw-bold">Completed</span>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-2 text-muted fw-bold">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i> @item.EventDate.ToString("MMM dd, yyyy")
+                            </div>
+                            <h4 class="card-title fw-bold text-dark mb-3">@item.Title</h4>
+                             <p class="text-muted text-truncate">@item.Description</p>
+                             <div class="d-flex align-items-center pt-3 border-top">
+                                <i class="bi bi-geo-alt-fill text-muted me-2"></i>
+                                <span class="text-muted small">@item.Location</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+$(document).ready(function() {
+    // Search applies to UPCOMING events primarily
+    $('#searchForm').on('submit', function(e) {
+        e.preventDefault();
+        performSearch();
+    });
+
+    $('#searchInput, #categorySelect, #dateFilterSelect, #maxPriceInput, #locationInput').on('change', function() {
+        performSearch();
+    });
+
+    function performSearch() {
+        const formData = {
+            search: $('#searchInput').val(),
+            category: $('#categorySelect').val(),
+            dateFilter: $('#dateFilterSelect').val(),
+            maxPrice: $('#maxPriceInput').val(),
+            location: $('#locationInput').val()
+        };
+
+        $.ajax({
+            url: '@Url.Action("SearchEvents", "Home")',
+            type: 'GET',
+            data: formData,
+            success: function(events) {
+                displayResults(events);
+            },
+            error: function() {
+                $('#eventsContainer').html('<div class="alert alert-danger">Error loading events. Please try again.</div>');
+            }
+        });
+    }
+
+    function displayResults(events) {
+        let html = '';
+        
+        if (events.length === 0) {
+            html = `
+                <div class="text-center py-5 border rounded-4 bg-light">
+                    <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                    <h3 class="mt-4">No events found</h3>
+                    <p class="text-muted">Try adjusting your filters!</p>
+                </div>
+            `;
+        } else {
+            html = '<div class="row g-4">';
+            events.forEach(function(event) {
+                html += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card event-card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                            <div class="position-relative">
+                                ${event.imageUrl ? 
+                                    `<img src="${event.imageUrl}" class="card-img-top" style="height: 240px; object-fit: cover;" alt="${event.title}">` :
+                                    `<div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 240px;">
+                                        <i class="bi bi-image text-white-50 display-1"></i>
+                                    </div>`
+                                }
+                                <div class="position-absolute top-0 end-0 m-3">
+                                    <span class="badge bg-white text-dark shadow-sm px-3 py-2 fw-bold">$${event.price.toFixed(2)}</span>
+                                </div>
+                                <div class="position-absolute bottom-0 start-0 m-3">
+                                    <span class="badge bg-primary px-3 py-2 fw-bold seat-count">${event.availableSeats} Left</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-2 text-danger fw-bold">
+                                    <i class="bi bi-calendar-event me-2"></i> ${event.eventDate}
+                                </div>
+                                <h4 class="card-title fw-bold text-dark mb-3">${event.title}</h4>
+                                <p class="text-muted text-truncate">${event.description}</p>
+                                
+                                <div class="d-flex align-items-center pt-3 border-top">
+                                    <i class="bi bi-geo-alt-fill text-muted me-2"></i>
+                                    <span class="text-muted small">${event.location}</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 p-4 pt-0">
+                                <a href="/Event/Details/${event.id}" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+        
+        $('#eventsContainer').html(html);
+    }
+});
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+}
+
+<!-- CTA Section -->
+<div class="container-fluid px-4 px-md-5 my-5 py-5">
+    <div class="bg-primary rounded-5 p-5 text-white text-center shadow-lg position-relative overflow-hidden">
+        <div class="position-absolute start-0 top-0 h-100 w-100 opacity-25" style="background: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
+        <div class="position-relative z-index-1">
+            <h2 class="display-5 fw-bold mb-3">Are you an Event Organizer?</h2>
+            <p class="lead mb-4">Join thousands of organizers and manage your events efficiently with our platform.</p>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg px-5 py-3 rounded-pill fw-bold text-primary shadow">Register as Organizer</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .event-card {
+        transition: transform 0.3s ease, shadow 0.3s ease;
+    }
+    .event-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important;
+    }
+    .mt-n5 { margin-top: -5rem !important; }
+    .z-index-2 { z-index: 2; }
+    .tracking-wider { letter-spacing: 0.1rem; }
+    .grayscale-hover img { transition: filter 0.3s; }
+    .grayscale-hover:hover img { filter: grayscale(0%) !important; }
+    
+    .carousel-item { transition: transform .6s ease-in-out; }
+    .carousel-indicators button { width: 12px; height: 12px; border-radius: 50%; margin: 0 5px; }
+    .premium-gradient-text {
+        background: linear-gradient(to right, #ffffff, #a8dce7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>

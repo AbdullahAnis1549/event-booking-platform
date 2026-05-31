@@ -1,0 +1,170 @@
+@model IEnumerable<WebApplication4.Models.AboutContent>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Manage About Page";
+}
+
+<div class="container py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h2 class="fw-bold text-dark border-start border-4 border-primary ps-3">Manage About Page</h2>
+            <p class="text-muted">Add, edit, or remove content sections for the About page.</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#addAboutModal">
+                <i class="bi bi-plus-lg me-2"></i> Add New Section
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        @foreach (var content in Model)
+        {
+            <div class="col-12">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="card-title fw-bold mb-0 me-3">@content.SectionTitle</h5>
+                                    @if (content.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                    <span class="badge bg-info ms-2">Order: @content.DisplayOrder</span>
+                                </div>
+                                <p class="text-muted small mb-2">@(content.Content.Length > 150 ? content.Content.Substring(0, 150) + "..." : content.Content)</p>
+                                @if (!string.IsNullOrEmpty(content.ImageUrl))
+                                {
+                                    <small class="text-muted"><i class="bi bi-image me-1"></i>Image URL provided</small>
+                                }
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-outline-primary btn-sm rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#editAboutModal@content.Id">
+                                    <i class="bi bi-pencil me-1"></i> Edit
+                                </button>
+                                <form asp-action="DeleteAboutContent" method="post" class="d-inline" onsubmit="return confirm('Delete this section?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@content.Id" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Modal -->
+            <div class="modal fade" id="editAboutModal@content.Id" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content border-0 shadow-lg rounded-4">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold">Edit About Section</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <form asp-action="UpdateAboutContent" method="post" enctype="multipart/form-data">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@content.Id" />
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Section Title</label>
+                                    <input type="text" name="sectionTitle" class="form-control bg-light border-0" value="@content.SectionTitle" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Content</label>
+                                    <textarea name="content" class="form-control bg-light border-0" rows="6" required>@content.Content</textarea>
+                                    <small class="text-muted">You can use line breaks. They will be converted to HTML.</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Change Image (Optional)</label>
+                                    <input type="file" name="imageFile" class="form-control bg-light border-0" accept="image/*">
+                                    @if (!string.IsNullOrEmpty(content.ImageUrl))
+                                    {
+                                        <small class="text-success mt-1 d-block"><i class="bi bi-check-circle me-1"></i>Current image exists. Upload new one to replace it.</small>
+                                    }
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Display Order</label>
+                                        <input type="number" name="displayOrder" class="form-control bg-light border-0" value="@content.DisplayOrder" min="0">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Status</label>
+                                        <select name="isActive" class="form-select bg-light border-0">
+                                            <option value="true" selected="@content.IsActive">Active</option>
+                                            <option value="false" selected="@(!content.IsActive)">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">Update Section</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+            <i class="bi bi-info-circle text-muted" style="font-size: 4rem;"></i>
+            <h3 class="mt-4 fw-bold">No Content Added Yet</h3>
+            <p class="text-muted">Start by adding your first section about your company.</p>
+        </div>
+    }
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addAboutModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Add About Section</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form asp-action="AddAboutContent" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Section Title</label>
+                        <input type="text" name="sectionTitle" class="form-control bg-light border-0" required placeholder="e.g., Our Mission">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Content</label>
+                        <textarea name="content" class="form-control bg-light border-0" rows="6" required placeholder="Enter the content for this section..."></textarea>
+                        <small class="text-muted">You can use line breaks. They will be converted to HTML.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Section Image (Optional)</label>
+                        <input type="file" name="imageFile" class="form-control bg-light border-0" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Display Order</label>
+                        <input type="number" name="displayOrder" class="form-control bg-light border-0" value="0" min="0">
+                        <small class="text-muted">Lower numbers appear first</small>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">Add Section</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

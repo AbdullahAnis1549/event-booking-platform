@@ -1,0 +1,290 @@
+@model WebApplication4.Models.Event
+@{
+    ViewData["Title"] = Model.Title;
+    var userRole = Context.Session.GetString("UserRole");
+}
+
+<div class="bg-light pb-5">
+    <!-- Dynamic Header Section -->
+    <div class="position-relative overflow-hidden mb-5 text-white shadow-lg" style="height: 380px; background: #0b0b0b;">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <!-- Dynamic Blurred Background for Premium Feel -->
+            <img src="@Model.ImageUrl" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover; filter: blur(30px) brightness(0.3); transform: scale(1.1);" />
+        }
+        
+        <!-- Sophisticated Gradient -->
+        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%);"></div>
+
+        <div class="container h-100 position-relative z-index-1">
+            <div class="h-100 d-flex flex-column justify-content-center py-4">
+                <!-- Navigation -->
+                <div class="mb-4">
+                    <a asp-controller="Event" asp-action="Index" class="btn btn-link text-white text-decoration-none p-0 fw-bold opacity-75 hover-opacity-100">
+                        <i class="bi bi-arrow-left me-2"></i> Back to Events
+                    </a>
+                </div>
+
+                <div class="row align-items-center g-4">
+                    <!-- Poster Image (Fixes blur issue by not stretching full width) -->
+                    <div class="col-md-4 col-lg-3 d-none d-md-block">
+                        <div class="poster-container rounded-4 shadow-lg overflow-hidden border border-white border-opacity-10" style="height: 240px;">
+                            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=500" : Model.ImageUrl)" 
+                                 class="w-100 h-100" style="object-fit: cover;" alt="@Model.Title">
+                        </div>
+                    </div>
+
+                    <!-- Event Quick Info -->
+                    <div class="col-md-8 col-lg-9">
+                        <div class="mb-3">
+                            <span class="badge bg-primary px-3 py-2 shadow-sm">@Model.Category</span>
+                            @if (!string.IsNullOrEmpty(Model.SubCategory))
+                            {
+                                <span class="badge bg-warning text-dark px-3 py-2 ms-1 shadow-sm">@Model.SubCategory</span>
+                            }
+                        </div>
+                        <h1 class="display-4 fw-bold mb-3 text-shadow-sm">@Model.Title</h1>
+                        <p class="lead mb-0 fs-5"><i class="bi bi-geo-alt me-2 text-warning"></i>@Model.Location</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-n5">
+        <div class="row g-4 justify-content-center">
+            <!-- Left Info Column -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-5">
+                        <div class="d-flex align-items-center mb-5 border-bottom pb-4">
+                            <div class="d-flex align-items-center me-5">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="bi bi-calendar-date text-primary fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-uppercase text-muted fw-bold">Date & Time</small>
+                                    <h5 class="mb-0 fw-bold">@Model.EventDate.ToString("MMMM dd, yyyy")</h5>
+                                    <small class="text-muted">Starts at @Model.EventDate.ToString("hh:mm tt")</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
+                                     <i class="bi bi-currency-dollar premium-gold-text fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-uppercase text-muted fw-bold">Ticket Price</small>
+                                    <h5 class="mb-0 fw-bold">@Model.Price.ToString("C")</h5>
+                                    <small class="text-muted">Per Person</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 class="fw-bold mb-4">About this Event</h4>
+                        <div class="text-muted fs-5 mb-5" style="line-height: 1.8;">
+                            @Model.Description
+                        </div>
+
+                        <hr class="my-5">
+
+                        <!-- Reviews Section -->
+                        <div class="reviews-section" id="reviews">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h4 class="fw-bold mb-0">User Reviews</h4>
+                                <div class="text-warning fs-5 d-flex align-items-center">
+                                    <div class="me-2">
+                                        @for(int i=1; i<=5; i++) {
+                                            <i class="bi bi-star@(i <= (double)ViewBag.AverageRating ? "-fill" : "")"></i>
+                                        }
+                                    </div>
+                                    <span class="ms-1 text-muted fw-bold">(@ViewBag.AverageRating.ToString("F1"))</span>
+                                </div>
+                            </div>
+
+                            @if (Context.Session.GetString("UserId") != null)
+                            {
+                                if (ViewBag.HasBooked && !ViewBag.UserAlreadyReviewed)
+                                {
+                                    <div class="card border-0 bg-light rounded-4 mb-5 p-4 shadow-sm animate__animated animate__fadeIn">
+                                        <h6 class="fw-bold mb-3"><i class="bi bi-chat-left-dots me-2 text-primary"></i>Share your experience</h6>
+                                        <form asp-controller="Review" asp-action="SubmitReview" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="eventId" value="@Model.Id" />
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-muted">Your Rating</label>
+                                                <div class="rating-input d-flex gap-2 flex-row-reverse justify-content-start">
+                                                    @for (int i = 5; i >= 1; i--)
+                                                    {
+                                                        <input type="radio" name="rating" value="@i" id="star@i" required class="visually-hidden">
+                                                        <label for="star@i" class="bi bi-star cursor-pointer fs-3 text-warning rating-star" onclick="highlightStars(@i)"></label>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <textarea name="comment" class="form-control border-0 bg-white shadow-sm" rows="3" placeholder="What did you think of the event? (e.g. Great atmosphere, well organized...)" required></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold">Post Review</button>
+                                        </form>
+                                    </div>
+                                }
+                                else if (!ViewBag.HasBooked)
+                                {
+                                    <div class="alert alert-info border-0 rounded-4 mb-5 d-flex align-items-center">
+                                        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                        <div>
+                                            <strong>Want to review?</strong> Only attendees who have purchased a ticket can leave a review for this event.
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center py-4 bg-light rounded-4 mb-5">
+                                    <p class="mb-2 text-muted">Want to share your thoughts?</p>
+                                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-sm rounded-pill px-4">Login to Review</a>
+                                </div>
+                            }
+
+                            <div class="reviews-list">
+                                @if (ViewBag.Reviews != null && ((IEnumerable<WebApplication4.Models.Review>)ViewBag.Reviews).Any())
+                                {
+                                    @foreach (var review in (IEnumerable<WebApplication4.Models.Review>)ViewBag.Reviews)
+                                    {
+                                        <div class="review-item mb-4 pb-4 border-bottom">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center text-white" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                                        @review.User?.Name.Substring(0,1).ToUpper()
+                                                    </div>
+                                                    <span class="fw-bold small">@review.User?.Name</span>
+                                                </div>
+                                                <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                            </div>
+                                            <div class="text-warning mb-2 small">
+                                                @for(int i=1; i<=5; i++) {
+                                                    <i class="bi bi-star@(i <= review.Rating ? "-fill" : "")"></i>
+                                                }
+                                            </div>
+                                            <p class="mb-0 text-muted small">@review.Comment</p>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-muted text-center py-4">No reviews yet. Be the first to share your thoughts!</p>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center p-4 bg-light rounded-4 mt-5">
+                            <div class="avatar bg-dark text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                @Model.Organizer?.Name.Substring(0,1).ToUpper()
+                            </div>
+                            <div>
+                                <small class="text-muted">Event Organized by</small>
+                                <h5 class="mb-0 fw-bold">@Model.Organizer?.Name</h5>
+                                <a href="mailto:@Model.Organizer?.Email" class="text-decoration-none small">Contact Organizer</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Booking Column -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden position-sticky" style="top: 2rem;">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-4">
+                            <h2 class="fw-bold text-dark">Get Your Tickets</h2>
+                            <p class="text-muted">Secure your spot at this event!</p>
+                        </div>
+
+                        @if (Model.EventDate >= DateTime.Now)
+                        {
+                            if (Model.AvailableSeats > 0)
+                            {
+                                <form asp-controller="Booking" asp-action="Register" method="post" id="bookingForm">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="eventId" value="@Model.Id" />
+                                    
+                                    <div class="mb-4 text-start">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Select Quantity</label>
+                                        <select name="tickets" class="form-select form-select-lg border-2" id="ticketQty">
+                                            @for (int i = 1; i <= Math.Min(10, Model.AvailableSeats); i++)
+                                            {
+                                                <option value="@i">@i Tickets</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="p-4 bg-light rounded-4 mb-4">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Total Amount</span>
+                                            <h4 class="fw-bold mb-0" id="totalDisplay">@Model.Price.ToString("C")</h4>
+                                        </div>
+                                        <small class="text-muted d-block text-start">
+                                            <i class="bi bi-info-circle me-1"></i> @Model.AvailableSeats seats remaining
+                                        </small>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-3 shadow fw-bold mb-3">
+                                        Reserve Now
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="alert alert-danger py-4">
+                                    <i class="bi bi-calendar-x fs-1 mb-2 d-inline-block"></i>
+                                    <h4 class="fw-bold">Sold Out!</h4>
+                                    <p class="mb-0">All tickets have been booked for this upcoming event.</p>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary py-4">
+                                <i class="bi bi-clock-history fs-1 mb-2 d-inline-block"></i>
+                                <h4 class="fw-bold">Event Ended</h4>
+                                <p class="mb-0">This event has already taken place on @Model.EventDate.ToString("MMM dd, yyyy").</p>
+                            </div>
+                        }
+
+                        <div class="border-top pt-3 mt-4">
+                            <small class="text-muted">Professional Event Management by Eventify</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('ticketQty')?.addEventListener('change', function() {
+        const qty = parseInt(this.value);
+        const price = @Model.Price;
+        const total = qty * price;
+        document.getElementById('totalDisplay').innerText = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total);
+    });
+
+    function highlightStars(rating) {
+        for (let i = 1; i <= 5; i++) {
+            const label = document.querySelector(`label[for="star${i}"]`);
+            if (i <= rating) {
+                label.classList.replace('bi-star', 'bi-star-fill');
+            } else {
+                label.classList.replace('bi-star-fill', 'bi-star');
+            }
+        }
+    }
+</script>
+
+<style>
+    .text-shadow-sm { text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+    .hover-opacity-100:hover { opacity: 1 !important; transition: opacity 0.3s ease; }
+    .mt-n5 { margin-top: -5rem !important; }
+    .hero-image-zoom { transition: transform 0.5s ease; }
+    .hero-image-zoom:hover { transform: scale(1.05); }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">

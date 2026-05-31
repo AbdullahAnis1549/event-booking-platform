@@ -1,0 +1,83 @@
+@{
+    ViewData["Title"] = "Verify Email";
+    var email = ViewBag.Email as string ?? TempData["UserEmail"]?.ToString();
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h3 class="text-center mb-0">Verify Your Email</h3>
+            </div>
+            <div class="card-body">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <p class="text-muted text-center mb-4">
+                    We've sent a verification code to <strong>@email</strong>
+                </p>
+
+                <form asp-action="VerifyUser" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="email" value="@email" />
+
+                    <div class="mb-3">
+                        <label for="verificationCode" class="form-label">Verification Code</label>
+                        <input type="number" name="verificationCode" id="verificationCode" 
+                               class="form-control form-control-lg text-center" 
+                               placeholder="Enter 6-digit code" 
+                               maxlength="6" 
+                               required />
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+                    {
+                        <div class="alert alert-danger">
+                            @foreach (var error in ViewData.ModelState[""]?.Errors)
+                            {
+                                <p class="mb-0">@error.ErrorMessage</p>
+                            }
+                        </div>
+                    }
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-info btn-lg">Verify Email</button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-3">
+                    <p class="text-muted">Didn't receive the code? <a asp-action="Register">Register again</a></p>
+                    <p>Already verified? <a asp-action="Login">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-focus on verification code input
+        document.getElementById('verificationCode').focus();
+        
+        // Limit input to 6 digits
+        document.getElementById('verificationCode').addEventListener('input', function(e) {
+            if (this.value.length > 6) {
+                this.value = this.value.slice(0, 6);
+            }
+        });
+    </script>
+}

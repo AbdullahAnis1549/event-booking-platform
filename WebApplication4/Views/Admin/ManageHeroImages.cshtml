@@ -1,0 +1,88 @@
+@model IEnumerable<WebApplication4.Models.HeroImage>
+@{
+    ViewData["Title"] = "Manage Hero Images";
+}
+
+<div class="container py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h2 class="fw-bold text-dark border-start border-4 border-primary ps-3">Manage Hero Images</h2>
+            <p class="text-muted">Add or remove images from the homepage carousel.</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#addHeroModal">
+                <i class="bi bi-plus-lg me-2"></i> Add New Image
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        @foreach (var hero in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
+                    <img src="@hero.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Hero Image">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">@hero.Title</h5>
+                        <p class="card-text text-muted small">@hero.Subtitle</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <span class="badge bg-secondary">Order: @hero.DisplayOrder</span>
+                            <form asp-action="DeleteHeroImage" method="post" onsubmit="return confirm('Delete this image?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@hero.Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">
+                                    <i class="bi bi-trash me-1"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addHeroModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Add Hero Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form asp-action="AddHeroImage" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Choose Image</label>
+                        <input type="file" name="imageFile" class="form-control bg-light border-0" required accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Title</label>
+                        <input type="text" name="title" class="form-control bg-light border-0" placeholder="Main Heading">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Subtitle</label>
+                        <input type="text" name="subtitle" class="form-control bg-light border-0" placeholder="Short description">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Display Order</label>
+                        <input type="number" name="displayOrder" class="form-control bg-light border-0" value="1" min="1">
+                        <small class="text-muted">Lower numbers appear first.</small>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">Add Image</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

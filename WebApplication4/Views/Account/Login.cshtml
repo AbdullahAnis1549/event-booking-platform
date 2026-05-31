@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="row justify-content-center align-items-center mb-5" style="min-height: 80vh;">
+    <div class="col-md-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeIn">
+            <div class="card-header premium-gold-bg text-white py-4 text-center">
+                <i class="bi bi-person-lock fs-1 mb-2 d-block text-white"></i>
+                <h3 class="fw-bold mb-0 text-white">Welcome Back</h3>
+                <p class="mb-0 text-white opacity-75">Login to access your premium dashboard</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-4">
+                        <label for="email" class="form-label fw-bold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-envelope"></i></span>
+                            <input type="email" name="email" id="email" class="form-control bg-light border-0 py-3" 
+                                   placeholder="example@gmail.com" required autofocus />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-bold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-key"></i></span>
+                            <input type="password" name="password" id="password" class="form-control bg-light border-0 py-3" 
+                                   placeholder="Enter your password" required />
+                        </div>
+                    </div>
+
+                    @{
+                        var modelErrors = ViewData.ModelState.TryGetValue(string.Empty, out var entry)
+                            ? (entry?.Errors.Select(e => e.ErrorMessage) ?? Enumerable.Empty<string>())
+                            : Enumerable.Empty<string>();
+                    }
+                    @if (!ViewData.ModelState.IsValid && modelErrors.Any())
+                    {
+                        <div class="alert alert-danger">
+                            @foreach (var msg in modelErrors)
+                            {
+                                <p class="mb-0 small">@msg</p>
+                            }
+                        </div>
+                    }
+
+                    <div class="d-grid mb-4">
+                        <button type="submit" class="btn btn-primary btn-lg py-3 rounded-pill fw-bold shadow">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center">
+                    <p class="mb-1"><a asp-action="ForgotPassword" class="text-decoration-none premium-gold-text fw-bold">Forgot Password?</a></p>
+                    <p class="text-muted mb-0">Don't have an account? <a asp-action="Register" class="text-decoration-none premium-gold-text fw-bold">Join Elite Events</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

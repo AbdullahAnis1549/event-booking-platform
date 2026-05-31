@@ -1,0 +1,166 @@
+@model WebApplication4.Models.User
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeIn">
+            <div class="card-header premium-gold-bg text-white py-4 text-center">
+                <i class="bi bi-person-plus fs-1 mb-2 d-block text-white"></i>
+                <h3 class="fw-bold mb-0 text-white">Create Premium Account</h3>
+                <p class="mb-0 text-white opacity-75">Join the elite community of event organizers and attendees</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form asp-action="Register" method="post" enctype="multipart/form-data">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger mb-4">
+                            <strong class="d-block mb-2"><i class="bi bi-x-circle-fill me-2"></i>Please fix the following:</strong>
+                            <ul class="mb-0 small">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label fw-bold">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-person"></i></span>
+                            <input asp-for="Name" class="form-control bg-light border-0 py-3" placeholder="John Doe" />
+                        </div>
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Email" class="form-label fw-bold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Email" type="email" class="form-control bg-light border-0 py-3" placeholder="example@gmail.com" />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                        <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Only Gmail addresses are supported</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Phone" class="form-label fw-bold">Phone Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-telephone"></i></span>
+                            <input asp-for="Phone" type="tel" class="form-control bg-light border-0 py-3" placeholder="+1 234 567 890" />
+                        </div>
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold d-block">I want to join as:</label>
+                        <div class="d-flex gap-4 p-3 bg-light rounded-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="UserRole" value="user" id="roleUser" checked>
+                                <label class="form-check-label fw-bold" for="roleUser">
+                                    <i class="bi bi-person me-1 text-primary"></i> Attendee
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="UserRole" value="organizer" id="roleOrganizer">
+                                <label class="form-check-label fw-bold" for="roleOrganizer">
+                                    <i class="bi bi-briefcase me-1 text-success"></i> Event Organizer
+                                </label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="UserRole" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label fw-bold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-lock"></i></span>
+                                <input asp-for="Password" type="password" class="form-control bg-light border-0 py-3" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmedPassword" class="form-label fw-bold">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-shield-check"></i></span>
+                                <input asp-for="ConfirmedPassword" type="password" class="form-control bg-light border-0 py-3" />
+                            </div>
+                            <span asp-validation-for="ConfirmedPassword" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label for="imageFile" class="form-label fw-bold">Profile Image (Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-image"></i></span>
+                            <input type="file" name="imageFile" id="imageFile" class="form-control bg-light border-0 py-3" accept="image/*" />
+                        </div>
+                        <small class="text-muted">Max size: 5MB (JPG, PNG, GIF, WEBP)</small>
+                    </div>
+
+                    <div class="d-grid shadow-sm">
+                        <button type="submit" class="btn btn-primary btn-lg py-3 rounded-pill fw-bold">
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted">Already have an account? <a asp-action="Login" class="text-decoration-none premium-gold-text fw-bold">Sign In here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Client-side validation enhancement
+        $(document).ready(function() {
+            // Real-time password match validation
+            $('#ConfirmedPassword').on('keyup', function() {
+                var password = $('#Password').val();
+                var confirmPassword = $(this).val();
+                
+                if (confirmPassword !== '' && password !== confirmPassword) {
+                    $(this).get(0).setCustomValidity('Passwords do not match');
+                } else {
+                    $(this).get(0).setCustomValidity('');
+                }
+            });
+
+            // Email Gmail validation
+            $('#Email').on('blur', function() {
+                var email = $(this).val().toLowerCase();
+                var gmailDomain = '@@gmail.com';
+                if (email !== '' && !email.endsWith(gmailDomain)) {
+                    $(this).get(0).setCustomValidity('Email must be a Gmail address (@@gmail.com)');
+                } else {
+                    $(this).get(0).setCustomValidity('');
+                }
+            });
+
+            // Password length validation
+            $('#Password').on('keyup', function() {
+                var password = $(this).val();
+                if (password !== '' && password.length < 6) {
+                    $(this).get(0).setCustomValidity('Password must be at least 6 characters long');
+                } else {
+                    $(this).get(0).setCustomValidity('');
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,241 @@
+@model WebApplication4.Models.User
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg profile-card-modern">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h4 class="mb-0">Profile Settings</h4>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Profile" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Image Section -->
+                        <div class="text-center mb-5">
+                            <div class="profile-image-container mb-3">
+                                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                {
+                                    <img src="@Model.ImageUrl" alt="Profile" id="imagePreview" class="profile-img-preview" />
+                                }
+                                else
+                                {
+                                    <div id="imagePlaceholder" class="profile-img-placeholder">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                }
+                                <label for="imageUpload" class="btn btn-sm btn-dark rounded-circle edit-badge" title="Change Image">
+                                    <i class="bi bi-camera"></i>
+                                </label>
+                                <input type="file" name="imageFile" id="imageUpload" class="d-none" accept="image/*" onchange="previewProfileImage(this)" />
+                            </div>
+                            <h5 class="fw-bold mb-1">Profile Picture</h5>
+                            <p class="text-muted small">Click the camera icon to update your photo</p>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="bi bi-person me-2"></i>Full Name</label>
+                            <input asp-for="Name" class="form-control form-control-lg bg-light" placeholder="Enter your name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted"><i class="bi bi-envelope me-2"></i>Email Address</label>
+                            <input asp-for="Email" class="form-control form-control-lg bg-light border-0" readonly />
+                            <div class="form-text text-info small"><i class="bi bi-info-circle me-1"></i>Email cannot be changed.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="bi bi-telephone me-2"></i>Phone Number</label>
+                            <input asp-for="Phone" class="form-control form-control-lg bg-light" placeholder="Enter your phone number" />
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow-sm">
+                                <i class="bi bi-save2 me-2"></i>Save Changes
+                            </button>
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-link text-muted mt-2">Back to Dashboard</a>
+                        </div>
+                    </form>
+
+                    <hr class="my-5" />
+
+                    <!-- Organizer Request Section -->
+                    <div class="organizer-request-section p-4 rounded-3 bg-light border">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-person-badge me-2"></i>Organizer Program</h5>
+                        
+                        @if (Model.UserRole?.ToLower() == "organizer")
+                        {
+                            <div class="alert alert-success border-0 shadow-sm d-flex align-items-center">
+                                <i class="bi bi-patch-check-fill fs-2 me-3"></i>
+                                <div>
+                                    <h6 class="mb-1 fw-bold">Active Organizer Status</h6>
+                                    <p class="mb-0 small">You are currently registered as an event organizer. You can create and manage events.</p>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.UserRole?.ToLower() == "admin")
+                        {
+                            <div class="alert alert-info border-0 shadow-sm d-flex align-items-center">
+                                <i class="bi bi-shield-lock-fill fs-2 me-3"></i>
+                                <div>
+                                    <h6 class="mb-1 fw-bold">Admin Privileges</h6>
+                                    <p class="mb-0 small">You have full administrative access to the system.</p>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            var latestRequest = ViewBag.OrganizerRequest as WebApplication4.Models.OrganizerRequest;
+                            
+                            if (latestRequest == null)
+                            {
+                                <p class="text-muted small mb-4">Want to organize your own events? Join our organizer program to create, manage, and track your events.</p>
+                                <form asp-action="RequestOrganizer" method="post">
+                                    <button type="submit" class="btn btn-outline-primary w-100 fw-bold">
+                                        <i class="bi bi-send-plus me-2"></i>Request to Become Organizer
+                                    </button>
+                                </form>
+                            }
+                            else if (latestRequest.Status == "Pending")
+                            {
+                                <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center">
+                                    <div class="spinner-border spinner-border-sm me-3" role="status"></div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">Request Pending</h6>
+                                        <p class="mb-0 small">Your request was submitted on @latestRequest.RequestDate.ToString("MMM dd, yyyy"). Admin will review it shortly.</p>
+                                    </div>
+                                </div>
+                            }
+                            else if (latestRequest.Status == "Rejected")
+                            {
+                                <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-3">
+                                    <i class="bi bi-x-circle-fill fs-2 me-3"></i>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">Request Rejected</h6>
+                                        <p class="mb-0 small">Your previous request was not approved.</p>
+                                        @if (!string.IsNullOrEmpty(latestRequest.AdminComment))
+                                        {
+                                            <p class="mt-2 mb-0 small font-italic fw-bold">Reason: @latestRequest.AdminComment</p>
+                                        }
+                                    </div>
+                                </div>
+                                <form asp-action="RequestOrganizer" method="post">
+                                    <button type="submit" class="btn btn-outline-primary w-100 fw-bold">
+                                        <i class="bi bi-arrow-clockwise me-2"></i>Resubmit Request
+                                    </button>
+                                </form>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script>
+        function previewProfileImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let preview = document.getElementById('imagePreview');
+                    const placeholder = document.getElementById('imagePlaceholder');
+                    
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.id = 'imagePreview';
+                        preview.className = 'profile-img-preview';
+                        if (placeholder) {
+                            placeholder.parentNode.insertBefore(preview, placeholder);
+                            placeholder.style.display = 'none';
+                        }
+                    }
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
+
+<style>
+    .profile-card-modern {
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .profile-image-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
+
+    .profile-img-preview {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid #fff;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .profile-img-placeholder {
+        width: 150px;
+        height: 150px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 100px;
+        color: #dee2e6;
+        border: 5px solid #fff;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .edit-badge {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .edit-badge:hover {
+        transform: scale(1.1);
+    }
+
+    .form-control-lg {
+        border-radius: 12px;
+        font-size: 1rem;
+    }
+
+    .form-control-lg:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+</style>

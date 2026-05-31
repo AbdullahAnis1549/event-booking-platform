@@ -1,0 +1,90 @@
+@model IEnumerable<WebApplication4.Models.AboutContent>
+@{
+    ViewData["Title"] = "About Us";
+}
+
+<div class="bg-light py-5">
+    <div class="container-fluid px-4 px-md-5">
+        <!-- Header Section -->
+        <div class="text-center mb-5">
+            <span class="text-primary fw-bold text-uppercase tracking-wider">Our Story</span>
+            <h1 class="display-4 fw-bold text-dark mt-2">About Elite Events</h1>
+            <p class="lead text-muted">Discover who we are and what drives us</p>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                <i class="bi bi-info-circle text-muted" style="font-size: 4rem;"></i>
+                <h3 class="mt-4 fw-bold">Content Coming Soon</h3>
+                <p class="text-muted">We're working on adding amazing content about us. Check back soon!</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var content in Model)
+            {
+                <div class="row g-4 mb-5 animate__animated animate__fadeInUp">
+                    <div class="col-lg-6 @(content.DisplayOrder % 2 == 0 ? "order-lg-2" : "")">
+                        @if (!string.IsNullOrEmpty(content.ImageUrl))
+                        {
+                            <div class="position-relative rounded-4 overflow-hidden shadow-lg" style="height: 400px;">
+                                <img src="@content.ImageUrl" alt="@content.SectionTitle" class="w-100 h-100" style="object-fit: cover;">
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="bg-secondary rounded-4 d-flex align-items-center justify-content-center shadow-lg" style="height: 400px;">
+                                <i class="bi bi-image text-white-50" style="font-size: 5rem;"></i>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-lg-6 d-flex align-items-center @(content.DisplayOrder % 2 == 0 ? "order-lg-1" : "")">
+                        <div>
+                            <h2 class="fw-bold text-dark mb-4">@content.SectionTitle</h2>
+                            <div class="text-muted" style="line-height: 1.8; font-size: 1.1rem;">
+                                @Html.Raw(content.Content.Replace("\n", "<br/>"))
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+        <!-- Stats Section -->
+        <div class="row g-4 mt-5">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-4 bg-white h-100">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                        <i class="bi bi-calendar-check text-primary fs-3"></i>
+                    </div>
+                    <h3 class="fw-bold">100+</h3>
+                    <p class="text-muted mb-0">Events Hosted</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-4 bg-white h-100">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                        <i class="bi bi-people text-success fs-3"></i>
+                    </div>
+                    <h3 class="fw-bold">50k+</h3>
+                    <p class="text-muted mb-0">Happy Customers</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-4 bg-white h-100">
+                    <div class="bg-info bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                        <i class="bi bi-geo-alt text-info fs-3"></i>
+                    </div>
+                    <h3 class="fw-bold">20+</h3>
+                    <p class="text-muted mb-0">Cities Covered</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tracking-wider { letter-spacing: 0.1rem; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
