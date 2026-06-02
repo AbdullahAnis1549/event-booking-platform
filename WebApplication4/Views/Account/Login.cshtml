@@ -116,7 +116,7 @@
             // ── Email validation ────────────────────────────────────────
             function validateEmail() {
                 const val = emailInput.value.trim().toLowerCase();
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const emailRegex = new RegExp('^[^\\s@@]+@@[^\\s@@]+\\.[^\\s@@]+$');
 
                 if (val === '') {
                     setInvalid(emailInput, 'emailError', 'Email address is required.');

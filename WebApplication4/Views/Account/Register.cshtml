@@ -206,13 +206,13 @@
 
             function validateEmail() {
                 const val   = document.getElementById('Email').value.trim().toLowerCase();
-                const regex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                const regex = new RegExp('^[^\\s@@]+@@[^\\s@@]+\\.[^\\s@@]+$');
                 if (val === '') {
                     setInvalid('Email', 'emailError', 'Email address is required.'); return false;
                 } else if (!regex.test(val)) {
                     setInvalid('Email', 'emailError', 'Please enter a valid email address.'); return false;
-                } else if (!val.endsWith('@@gmail.com')) {
-                    setInvalid('Email', 'emailError', 'Only Gmail addresses are supported (@gmail.com).'); return false;
+                } else if (!val.endsWith('\x40gmail.com')) {
+                    setInvalid('Email', 'emailError', 'Only Gmail addresses are supported (\x40gmail.com).'); return false;
                 }
                 setValid('Email'); return true;
             }
