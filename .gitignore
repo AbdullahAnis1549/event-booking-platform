@@ -4,6 +4,5 @@ obj/
 publish/
 publish.zip
 appsettings.Development.json
-**/appsettings.Production.json
 *.csproj.user
 **/PublishProfiles/*.pubxml.user
