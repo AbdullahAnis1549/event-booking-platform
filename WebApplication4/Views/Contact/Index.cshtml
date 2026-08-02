@@ -7,15 +7,28 @@
     <div class="container-fluid px-4 px-md-5">
         <!-- Header Section -->
         <div class="text-center mb-5">
-            <span class="text-primary fw-bold text-uppercase tracking-wider">Get In Touch</span>
-            <h1 class="display-4 fw-bold text-dark mt-2">Contact Us</h1>
-            <p class="lead text-muted">We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
-        </div>
+
+            <span class="badge rounded-pill px-4 py-2 mb-3"
+                  style="background:rgba(212,175,55,.12);color:#d4af37;font-size:.9rem;">
+                GET IN TOUCH
+            </span>
+
+            <h1 class="display-3 fw-bold">
+                Contact
+                <span class="premium-gradient-text">Us</span>
+            </h1>
+
+            <p class="lead text-muted mx-auto"
+               style="max-width:700px;">
+                We'd love to hear from you. Send us a message and we'll get back to you as quickly as possible.
+            </p>
+
+      
 
         <div class="row g-5">
             <!-- Contact Form -->
             <div class="col-lg-8">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="card border-0 shadow-lg rounded-5 contact-card p-4 bg-white">
                     @if (TempData["SuccessMessage"] != null)
                     {
                         <div class="alert alert-success alert-dismissible fade show rounded-pill" role="alert">
@@ -130,10 +143,8 @@
 </div>
 
 <style>
-    .tracking-wider { letter-spacing: 0.1rem; }
-    .form-control:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    .tracking-wider {
+        letter-spacing: .12rem;
     }
 </style>
 

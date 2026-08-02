@@ -1,6 +1,7 @@
 @model IEnumerable<WebApplication4.Models.User>
 @{
     ViewData["Title"] = "Manage Users";
+    var pendingOrganizerIds = ViewBag.PendingOrganizerUserIds as List<int> ?? new List<int>();
 }
 
 <div class="container-fluid py-4">
@@ -8,6 +9,15 @@
         <div class="col">
             <h2 class="fw-bold text-dark border-start border-4 border-primary ps-3">User Management</h2>
             <p class="text-muted">Manage all registered users on the platform.</p>
+        </div>
+        <div class="col-auto d-flex align-items-center">
+            @if (pendingOrganizerIds.Count > 0)
+            {
+                <a asp-controller="Admin" asp-action="OrganizerRequests" class="btn btn-warning btn-sm fw-bold">
+                    <i class="bi bi-person-badge me-1"></i>
+                    @pendingOrganizerIds.Count Pending Organizer Request@(pendingOrganizerIds.Count > 1 ? "s" : "")
+                </a>
+            }
         </div>
     </div>
 
@@ -73,6 +83,13 @@
                                     else if (user.UserRole == "organizer")
                                     {
                                         <span class="badge bg-success">Organizer</span>
+                                    }
+                                    else if (pendingOrganizerIds.Contains(user.Id))
+                                    {
+                                        <span class="badge bg-primary">User</span>
+                                        <span class="badge bg-warning text-dark ms-1">
+                                            <i class="bi bi-hourglass-split me-1"></i>Pending Organizer
+                                        </span>
                                     }
                                     else
                                     {

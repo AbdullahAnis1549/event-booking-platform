@@ -151,6 +151,15 @@ namespace WebApplication4.Controllers
             if (userRole != "admin") return RedirectToAction("Login", "Account");
 
             var users = await _context.Users.OrderByDescending(u => u.Id).ToListAsync();
+
+            // Get user IDs that have a pending organizer request
+            var pendingOrganizerUserIds = await _context.OrganizerRequests
+                .Where(r => r.Status == "Pending")
+                .Select(r => r.UserId)
+                .ToListAsync();
+
+            ViewBag.PendingOrganizerUserIds = pendingOrganizerUserIds;
+
             return View(users);
         }
 
@@ -176,9 +185,82 @@ namespace WebApplication4.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user != null && user.UserRole != "admin")
             {
+                // 1. Get all events organized by this user
+                var organizerEvents = await _context.Events
+                    .Where(e => e.OrganizerId == id)
+                    .ToListAsync();
+                var organizerEventIds = organizerEvents.Select(e => e.Id).ToList();
+
+                if (organizerEventIds.Any())
+                {
+                    // 2. Delete Bookings associated with the organizer's events
+                    var bookingsOnEvents = await _context.Bookings
+                        .Where(b => organizerEventIds.Contains(b.EventId))
+                        .ToListAsync();
+                    _context.Bookings.RemoveRange(bookingsOnEvents);
+
+                    // 3. Delete Reviews associated with the organizer's events
+                    var reviewsOnEvents = await _context.Reviews
+                        .Where(r => organizerEventIds.Contains(r.EventId))
+                        .ToListAsync();
+                    _context.Reviews.RemoveRange(reviewsOnEvents);
+
+                    // 4. Delete images of events from Cloudinary
+                    foreach (var evt in organizerEvents)
+                    {
+                        if (!string.IsNullOrEmpty(evt.ImageUrl))
+                        {
+                            try
+                            {
+                                await _cloudinaryService.DeleteImageAsync(evt.ImageUrl);
+                            }
+                            catch (Exception)
+                            {
+                                // Prevent Cloudinary errors from blocking database deletion
+                            }
+                        }
+                    }
+
+                    // 5. Delete the events themselves
+                    _context.Events.RemoveRange(organizerEvents);
+                }
+
+                // 6. Delete Bookings made by the user
+                var userBookings = await _context.Bookings
+                    .Where(b => b.UserId == id)
+                    .ToListAsync();
+                _context.Bookings.RemoveRange(userBookings);
+
+                // 7. Delete Reviews written by the user
+                var userReviews = await _context.Reviews
+                    .Where(r => r.UserId == id)
+                    .ToListAsync();
+                _context.Reviews.RemoveRange(userReviews);
+
+                // 8. Delete OrganizerRequests submitted by the user
+                var userRequests = await _context.OrganizerRequests
+                    .Where(o => o.UserId == id)
+                    .ToListAsync();
+                _context.OrganizerRequests.RemoveRange(userRequests);
+
+                // 9. Delete user's profile image from Cloudinary
+                if (!string.IsNullOrEmpty(user.ImageUrl))
+                {
+                    try
+                    {
+                        await _cloudinaryService.DeleteImageAsync(user.ImageUrl);
+                    }
+                    catch (Exception)
+                    {
+                        // Prevent Cloudinary errors from blocking database deletion
+                    }
+                }
+
+                // 10. Delete the user
                 _context.Users.Remove(user);
+
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "User deleted successfully!";
+                TempData["SuccessMessage"] = "User and all associated data deleted successfully!";
             }
             return RedirectToAction(nameof(ManageUsers));
         }

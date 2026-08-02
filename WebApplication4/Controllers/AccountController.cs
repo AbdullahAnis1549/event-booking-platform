@@ -97,18 +97,39 @@ namespace WebApplication4.Controllers
                 model.VerifyStatus = false;
                 model.VerifyCode = verificationCode;
                 model.VerifyCodeExpDate = DateTime.UtcNow.AddMinutes(15); // Expires in 15 minutes
-                // Default to 'user' if null or empty, though the form should provide it
-                model.UserRole = !string.IsNullOrEmpty(model.UserRole) ? model.UserRole : "user";
+                
+                // If they signed up as organizer, we start them as a regular user and create an organizer request
+                bool isOrganizer = model.UserRole?.ToLower() == "organizer";
+                model.UserRole = "user";
 
                 // Save user to database
                 _context.Users.Add(model);
                 await _context.SaveChangesAsync();
 
+                if (isOrganizer)
+                {
+                    var organizerRequest = new OrganizerRequest
+                    {
+                        UserId = model.Id,
+                        RequestDate = DateTime.Now,
+                        Status = "Pending"
+                    };
+                    _context.OrganizerRequests.Add(organizerRequest);
+                    await _context.SaveChangesAsync();
+                }
+
                 // Send verification email
                 try
                 {
                     _emailService.SendVerificationEmail(model.Email, verificationCode);
-                    TempData["SuccessMessage"] = "Registration successful! Please check your email for verification code.";
+                    if (isOrganizer)
+                    {
+                        TempData["SuccessMessage"] = "Registration successful! Your request to become an Event Organizer has been sent to the admin for approval. Please verify your email first.";
+                    }
+                    else
+                    {
+                        TempData["SuccessMessage"] = "Registration successful! Please check your email for verification code.";
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -364,9 +385,8 @@ namespace WebApplication4.Controllers
 
                 if (user == null)
                 {
-                    // Don't reveal if email exists for security
-                    TempData["InfoMessage"] = "If the email exists, a password reset code has been sent.";
-                    return RedirectToAction("Login");
+                    ModelState.AddModelError("", "Email address is not registered.");
+                    return View();
                 }
 
                 // Generate reset code (alphanumeric, 8 characters)

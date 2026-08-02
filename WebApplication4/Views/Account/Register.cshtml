@@ -37,7 +37,7 @@
                         </div>
                     }
 
-                    {{!-- Full Name --}}
+                    @* Full Name *@
                     <div class="mb-4">
                         <label asp-for="Name" class="form-label fw-bold">Full Name</label>
                         <div class="input-group has-validation">
@@ -49,7 +49,7 @@
                         <span asp-validation-for="Name" class="text-danger small"></span>
                     </div>
 
-                    {{!-- Email --}}
+                    @* Email *@
                     <div class="mb-4">
                         <label asp-for="Email" class="form-label fw-bold">Email Address</label>
                         <div class="input-group has-validation">
@@ -62,7 +62,7 @@
                         <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Only Gmail addresses are supported</small>
                     </div>
 
-                    {{!-- Phone --}}
+                    @* Phone *@
                     <div class="mb-4">
                         <label asp-for="Phone" class="form-label fw-bold">Phone Number</label>
                         <div class="input-group has-validation">
@@ -74,7 +74,7 @@
                         <span asp-validation-for="Phone" class="text-danger small"></span>
                     </div>
 
-                    {{!-- Role --}}
+                    @* Role *@
                     <div class="mb-4">
                         <label class="form-label fw-bold d-block">I want to join as:</label>
                         <div class="d-flex gap-4 p-3 bg-light rounded-3">
@@ -94,7 +94,7 @@
                         <span asp-validation-for="UserRole" class="text-danger small"></span>
                     </div>
 
-                    {{!-- Password --}}
+                    @* Password *@
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             <label asp-for="Password" class="form-label fw-bold">Password</label>
@@ -126,7 +126,7 @@
                         </div>
                     </div>
 
-                    {{!-- Profile Image --}}
+                    @* Profile Image *@
                     <div class="mb-5">
                         <label for="imageFile" class="form-label fw-bold">Profile Image <span class="text-muted fw-normal">(Optional)</span></label>
                         <div class="input-group has-validation">

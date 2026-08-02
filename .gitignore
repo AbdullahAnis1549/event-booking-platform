@@ -6,3 +6,4 @@ publish.zip
 appsettings.Development.json
 *.csproj.user
 **/PublishProfiles/*.pubxml.user
+appsettings.json
